@@ -57,9 +57,7 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     final Result fr = result;
-    if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE);
-    } else if(call.method.equals("signIn")){
+    if(call.method.equals("signIn")){
       GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
       if(call.hasArgument("scopeSnapShot") && parseBooleanValue(call.argument("scopeSnapShot"), false)){
         builder.requestScopes(Games.SCOPE_GAMES_SNAPSHOTS, Drive.SCOPE_APPFOLDER);

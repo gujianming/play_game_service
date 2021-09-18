@@ -3,55 +3,88 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
-class SignInResult{
-  int? result;
+class PluginResult {
+  bool success;
+  String? message;
+
+  PluginResult(this.success, {String? message}) {
+    this.message = message;
+  }
+}
+
+/// the result of signIn method
+class SignInResult extends PluginResult {
+  /// users email
   String? name;
+
+  /// no use, like com.google?? something
   String? type;
 
-  SignInResult({Map<dynamic, dynamic>? map}) {
-    if(map == null){
-      this.result = -1;
+  SignInResult(Map<dynamic, dynamic> map) : super(map["result"] == 0) {
+    if (this.success) {
+      name = map["name"];
+      type = map["type"];
     } else {
-      this.result = map["result"];
-      if(this.result == 0){
-        name = map["name"];
-        type = map["type"];
-      }
+      message = map["exception"];
     }
   }
 }
+
+/// the result of LoadSnapshot
+class LoadSnapshotResult extends PluginResult {
+  Uint8List? data;
+
+  LoadSnapshotResult(Map<dynamic, dynamic> map) : super(map["result"] == 0) {
+    if (this.success) {
+      this.data = map["data"];
+    } else {
+      this.message = map["exception"];
+    }
+  }
+}
+
+/// Main Class, provider useful method
 class PlayGameService {
+  /// the channel communicate with platform
   static const MethodChannel _channel =
       const MethodChannel('play_game_service');
 
-  static Future<String?> get platformVersion async {
-    final String? version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
-
+  /// SignIn with google account, before you do anything, you must sign in
+  /// @param scopeSnapShot set to ture if you want play with snapshots
   static Future<SignInResult> signIn({bool scopeSnapShot = false}) async {
-    try{
-      Map<dynamic, dynamic> result = await _channel.invokeMethod('signIn', {"scopeSnapShot": scopeSnapShot});
-      return SignInResult(map: result);
-    } on PlatformException {
-      return SignInResult();
+    try {
+      Map<dynamic, dynamic> result = await _channel
+          .invokeMethod('signIn', {"scopeSnapShot": scopeSnapShot});
+      return SignInResult(result);
+    } catch (e) {
+      return SignInResult({"result": -1, "exception": e.toString()});
     }
   }
 
-  static Future<Map<dynamic, dynamic>> loadSnapShot(String name) async {
-    return await _channel.invokeMethod('loadSnapShot', {"name": name});
+  /// Get the snapshot data with the given name
+  /// @param name the snapshot's name you want get
+  static Future<LoadSnapshotResult> loadSnapShot(String name) async {
+    try {
+      Map<dynamic, dynamic> map =
+          await _channel.invokeMethod('loadSnapShot', {"name": name});
+      return LoadSnapshotResult(map);
+    } catch (e) {
+      return LoadSnapshotResult({"result": -1, "exception": e.toString()});
+    }
   }
 
-  static Future<bool> saveSnapShot(String name, Uint8List data, String description) async {
-    try{
-      Map<dynamic, dynamic> result = await _channel.invokeMethod('saveSnapShot', {"name": name, "data": data, "description": description});
-      if(result["result"] != 0){
-        print(result["exception"]);
-        return false;
-      }
-      return true;
-    } on PlatformException {
-      return false;
+  /// Save data to the snapshot with the given name
+  /// @param name the snapshot's name
+  /// @param data a byte array you want to save
+  /// @param description the description of the snapshot, will add to it's metedata
+  static Future<PluginResult> saveSnapShot(
+      String name, Uint8List data, String description) async {
+    try {
+      Map<dynamic, dynamic> result = await _channel.invokeMethod('saveSnapShot',
+          {"name": name, "data": data, "description": description});
+      return PluginResult(result["result"] == 0, message: result["exception"]);
+    } catch (e) {
+      return PluginResult(false, message: e.toString());
     }
   }
 }
