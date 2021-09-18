@@ -1,7 +1,8 @@
 name: play_game_service
 description: A new flutter plugin project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/gujianming/play_game_service
+author: gjm800@qq.com
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
