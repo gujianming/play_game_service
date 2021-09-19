@@ -88,33 +88,32 @@ class PlayGameService {
     }
   }
 
-  static Future<PluginResult> submitScore(String leaderBoardId, int score) async {
+  static Future<PluginResult> submitScore(
+      String leaderBoardId, int score) async {
     try {
-      Map<dynamic, dynamic> result = await _channel.invokeMethod('submitScore',
-          {"id": leaderBoardId, "score": score});
+      Map<dynamic, dynamic> result = await _channel
+          .invokeMethod('submitScore', {"id": leaderBoardId, "score": score});
       return PluginResult(result["result"] == 0, message: result["exception"]);
     } catch (e) {
       return PluginResult(false, message: e.toString());
     }
   }
-
 
   static Future<PluginResult> increment(String achivementId) async {
     try {
-      Map<dynamic, dynamic> result = await _channel.invokeMethod('increment',
-          {"id": achivementId});
+      Map<dynamic, dynamic> result =
+          await _channel.invokeMethod('increment', {"id": achivementId});
       return PluginResult(result["result"] == 0, message: result["exception"]);
     } catch (e) {
       return PluginResult(false, message: e.toString());
     }
   }
 
-
-
-  static void showLeaderboards() async{
+  static void showLeaderboards() async {
     _channel.invokeMethod('showLeaderboards');
   }
-  static void showAchievements() async{
+
+  static void showAchievements() async {
     _channel.invokeMethod('showAchievements');
   }
 }
