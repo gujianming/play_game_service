@@ -9,3 +9,7 @@
 ## 0.2.1
 
 * support sign-in explicitly; support leaderboards and achievements
+
+## 0.2.2
+
+* Won't try to get anything about user; unify the return type

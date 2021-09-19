@@ -4,29 +4,12 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 
 class PluginResult {
-  bool success;
+  bool success = false;
   String? message;
 
-  PluginResult(this.success, {String? message}) {
-    this.message = message;
-  }
-}
-
-/// the result of signIn method
-class SignInResult extends PluginResult {
-  /// users email
-  String? name;
-
-  /// no use, like com.google?? something
-  String? type;
-
-  SignInResult(Map<dynamic, dynamic> map) : super(map["result"] == 0) {
-    if (this.success) {
-      name = map["name"];
-      type = map["type"];
-    } else {
-      message = map["exception"];
-    }
+  PluginResult(Map<dynamic, dynamic> map, {String? message}) {
+    this.success = map["success"];
+    this.message = map["exception"];
   }
 }
 
@@ -34,11 +17,9 @@ class SignInResult extends PluginResult {
 class LoadSnapshotResult extends PluginResult {
   Uint8List? data;
 
-  LoadSnapshotResult(Map<dynamic, dynamic> map) : super(map["result"] == 0) {
+  LoadSnapshotResult(Map<dynamic, dynamic> map) : super(map) {
     if (this.success) {
       this.data = map["data"];
-    } else {
-      this.message = map["exception"];
     }
   }
 }
@@ -51,13 +32,13 @@ class PlayGameService {
 
   /// SignIn with google account, before you do anything, you must sign in
   /// @param scopeSnapShot set to ture if you want play with snapshots
-  static Future<SignInResult> signIn({bool scopeSnapShot = false}) async {
+  static Future<PluginResult> signIn({bool scopeSnapShot = false}) async {
     try {
       Map<dynamic, dynamic> result = await _channel
           .invokeMethod('signIn', {"scopeSnapShot": scopeSnapShot});
-      return SignInResult(result);
+      return PluginResult(result);
     } catch (e) {
-      return SignInResult({"result": -1, "exception": e.toString()});
+      return PluginResult({"success": false, "exception": e});
     }
   }
 
@@ -69,7 +50,7 @@ class PlayGameService {
           await _channel.invokeMethod('loadSnapShot', {"name": name});
       return LoadSnapshotResult(map);
     } catch (e) {
-      return LoadSnapshotResult({"result": -1, "exception": e.toString()});
+      return LoadSnapshotResult({"success": false, "exception": e});
     }
   }
 
@@ -82,9 +63,9 @@ class PlayGameService {
     try {
       Map<dynamic, dynamic> result = await _channel.invokeMethod('saveSnapShot',
           {"name": name, "data": data, "description": description});
-      return PluginResult(result["result"] == 0, message: result["exception"]);
+      return PluginResult(result);
     } catch (e) {
-      return PluginResult(false, message: e.toString());
+      return PluginResult({"success": false, "exception": e});
     }
   }
 
@@ -93,9 +74,9 @@ class PlayGameService {
     try {
       Map<dynamic, dynamic> result = await _channel
           .invokeMethod('submitScore', {"id": leaderBoardId, "score": score});
-      return PluginResult(result["result"] == 0, message: result["exception"]);
+      return PluginResult(result);
     } catch (e) {
-      return PluginResult(false, message: e.toString());
+      return PluginResult({"success": false, "exception": e});
     }
   }
 
@@ -103,9 +84,9 @@ class PlayGameService {
     try {
       Map<dynamic, dynamic> result =
           await _channel.invokeMethod('increment', {"id": achivementId});
-      return PluginResult(result["result"] == 0, message: result["exception"]);
+      return PluginResult(result);
     } catch (e) {
-      return PluginResult(false, message: e.toString());
+      return PluginResult({"success": false, "exception": e});
     }
   }
 

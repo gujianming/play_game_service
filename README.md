@@ -8,7 +8,7 @@ A Google Play Games Services plugin for flutter
 
     ```yml
     dependencies:
-      play_game_service: ^0.0.1
+      play_game_service: ^0.2.2
     ```
 
 1. import requirements
@@ -33,13 +33,13 @@ A Google Play Games Services plugin for flutter
 1. Load Game Data
 
     ```dart
-    var map = await PlayGameService.loadSnapShot("HashiTogether");
-    if(map["result"] == 0){
-        Uint8List data = map["data"];
+    var ret = await PlayGameService.signIn(scopeSnapShot: true);
+    if (ret.success) {
+      var loadResult = await PlayGameService.loadSnapShot("HashiTogether");
+      if (loadResult.success) {
+        Uint8List data = loadResult.data!;
         // TODO Now you have data, do what you want.
-        return true;
-    } else {
-        return false;
+      }
     }
     ```
 

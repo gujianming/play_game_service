@@ -74,7 +74,6 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         final Result fr = result;
-        final Map<String, Object> retMap = new HashMap<>();
         if (call.method.equals("signIn")) {
             GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
             if (call.hasArgument("scopeSnapShot") && parseBooleanValue(call.argument("scopeSnapShot"), false)) {
@@ -85,7 +84,7 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
             if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
                 // Already signed in.
                 // The signed in account is stored in the 'account' variable.
-                fr.success(new SignInResult(0, account.getAccount()).toMap());
+                fr.success(new PluginResult().toMap());
             } else {
                 // Haven't been signed-in before. Try the silent sign-in first.
                 GoogleSignInClient signInClient = GoogleSignIn.getClient(context, signInOptions);
@@ -95,7 +94,7 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                                 task -> {
                                     if (task.isSuccessful()) {
                                         // The signed in account is stored in the task's result.
-                                        fr.success(new SignInResult(0, task.getResult().getAccount()).toMap());
+                                        fr.success(new PluginResult().toMap());
                                     } else {
                                         // silent sign-in failed, try to sign-in explicitly
                                         lastResult = fr;
@@ -118,19 +117,14 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                             snapshotsClient.commitAndClose(snapshot, metadataChange)
                                     .addOnCompleteListener((task1 -> {
                                         if (task1.isSuccessful()) {
-                                            retMap.put("result", 0);
-                                            fr.success(retMap);
+                                            fr.success(new PluginResult().toMap());
                                         } else {
-                                            retMap.put("result", -1);
-                                            retMap.put("exception", task.getException());
-                                            fr.success(retMap);
+                                            fr.success(new PluginResult(task.getException()).toMap());
                                         }
                                     }));
                         } else {
                             // 保存失败
-                            retMap.put("result", -1);
-                            retMap.put("exception", task.getException());
-                            fr.success(retMap);
+                            fr.success(new PluginResult(task.getException()).toMap());
                         }
                     });
         } else if (call.method.equals("loadSnapShot")) {
@@ -140,43 +134,31 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                         if (task.isSuccessful()) {
                             Snapshot snapshot = task.getResult().getData();
                             try {
-                                retMap.put("data", snapshot.getSnapshotContents().readFully());
-                                retMap.put("result", 0);
-                                fr.success(retMap);
+                                fr.success(new PluginResult().setData(snapshot.getSnapshotContents().readFully()).toMap());
                             } catch (IOException e) {
-                                retMap.put("exception", e);
-                                retMap.put("result", -1);
-                                fr.success(retMap);
+                                fr.success(new PluginResult(e).toMap());
                             }
                         } else {
                             // 保存失败
-                            retMap.put("result", -1);
-                            retMap.put("exception", task.getException());
-                            fr.success(retMap);
+                            fr.success(new PluginResult(task.getException()).toMap());
                         }
                     });
         } else if (call.method.equals("increment")) {
             Games.getAchievementsClient(context, GoogleSignIn.getLastSignedInAccount(context))
                     .incrementImmediate(call.argument("id"), 1)
                     .addOnSuccessListener((task) -> {
-                        retMap.put("result", 0);
-                        fr.success(retMap);
+                        fr.success(new PluginResult().toMap());
                     }).addOnFailureListener((e) -> {
-                retMap.put("result", -1);
-                retMap.put("exception", e);
-                fr.success(retMap);
+                fr.success(new PluginResult(e).toMap());
             });
             ;
         } else if (call.method.equals("submitScore")) {
             Games.getLeaderboardsClient(context, GoogleSignIn.getLastSignedInAccount(context))
                     .submitScoreImmediate(call.argument("id"), call.argument("score"))
                     .addOnSuccessListener((task) -> {
-                        retMap.put("result", 0);
-                        fr.success(retMap);
+                        fr.success(new PluginResult().toMap());
                     }).addOnFailureListener((e) -> {
-                retMap.put("result", -1);
-                retMap.put("exception", e);
-                fr.success(retMap);
+                fr.success(new PluginResult(e).toMap());
             });
         } else if (call.method.equals("showAchievements")) {
             Games.getAchievementsClient(context, GoogleSignIn.getLastSignedInAccount(context))
@@ -232,9 +214,9 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                 if (result.isSuccess()) {
                     // The signed in account is stored in the result.
                     GoogleSignInAccount signedInAccount = result.getSignInAccount();
-                    lastResult.success(new SignInResult(0, signedInAccount.getAccount()).toMap());
+                    lastResult.success(new PluginResult().toMap());
                 } else {
-                    lastResult.success(new SignInResult(-1).toMap());
+                    lastResult.success(new PluginResult(new Exception("Login failed")).toMap());
                 }
                 return true;
             }
