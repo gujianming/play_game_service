@@ -42,3 +42,27 @@ A Google Play Games Services plugin for flutter
         return false;
     }
     ```
+
+1. Show Leaderboards
+
+    ```dart
+    PlayGameService.showLeaderboards();
+    ```
+
+1. Submit score
+
+    ```dart
+    PlayGameService.submitScore(leaderBoardId, count);
+    ```
+
+1. Show Achievement
+
+    ```dart
+    PlayGameService.showAchievements();
+    ```
+
+1. Achievement increment
+
+    ```dart
+    PlayGameService.increment(gameId.android!);
+    ```
