@@ -76,16 +76,16 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
         final Result fr = result;
         if (call.method.equals("signIn")) {
             GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
-            if (call.hasArgument("scopeSnapShot") && parseBooleanValue(call.argument("scopeSnapShot"), false)) {
+            if (parseBooleanValue(call.argument("scopeSnapShot"), false)) {
                 builder.requestScopes(Games.SCOPE_GAMES_SNAPSHOTS, Drive.SCOPE_APPFOLDER);
             }
             GoogleSignInOptions signInOptions = builder.build();
-            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(context);
-            if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
-                // Already signed in.
-                // The signed in account is stored in the 'account' variable.
-                fr.success(new PluginResult().toMap());
-            } else {
+//            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(context);
+//            if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
+//                // Already signed in.
+//                // The signed in account is stored in the 'account' variable.
+//                fr.success(new PluginResult().toMap());
+//            } else {
                 // Haven't been signed-in before. Try the silent sign-in first.
                 GoogleSignInClient signInClient = GoogleSignIn.getClient(context, signInOptions);
                 signInClient
@@ -102,7 +102,7 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                                         activity.startActivityForResult(intent, RC_SIGNIN);
                                     }
                                 });
-            }
+//            }
         } else if (call.method.equals("saveSnapShot")) {
             SnapshotsClient snapshotsClient = Games.getSnapshotsClient(context, GoogleSignIn.getLastSignedInAccount(context));
             snapshotsClient.open(call.argument("name"), true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)

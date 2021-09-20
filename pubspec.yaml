@@ -1,6 +1,6 @@
 name: play_game_service
 description: A Google Play Games Service Plugin, Created for my little game app. Only support Android for now, but nullsafe
-version: 0.2.3
+version: 0.2.4
 homepage: https://github.com/gujianming/play_game_service
 
 environment:

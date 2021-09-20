@@ -17,3 +17,7 @@
 ## 0.2.3
 
 * fix unsupported type exception
+
+## 0.2.4
+
+* if you already signed in with no Games.SCOPE_GAMES_SNAPSHOTS and Drive.SCOPE_APPFOLDER, then you request thease scopes, GoogleSignIn.hasPermissions(last-signed-account) return true. it lead to backup failed
