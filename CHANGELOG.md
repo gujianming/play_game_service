@@ -13,3 +13,7 @@
 ## 0.2.2
 
 * Won't try to get anything about user; unify the return type
+
+## 0.2.3
+
+* fix unsupported type exception

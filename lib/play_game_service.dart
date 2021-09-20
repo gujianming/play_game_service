@@ -28,7 +28,7 @@ class LoadSnapshotResult extends PluginResult {
 class PlayGameService {
   /// the channel communicate with platform
   static const MethodChannel _channel =
-      const MethodChannel('play_game_service');
+  const MethodChannel('play_game_service');
 
   /// SignIn with google account, before you do anything, you must sign in
   /// @param scopeSnapShot set to ture if you want play with snapshots
@@ -38,7 +38,7 @@ class PlayGameService {
           .invokeMethod('signIn', {"scopeSnapShot": scopeSnapShot});
       return PluginResult(result);
     } catch (e) {
-      return PluginResult({"success": false, "exception": e});
+      return PluginResult({"success": false, "exception": e.toString()});
     }
   }
 
@@ -47,10 +47,10 @@ class PlayGameService {
   static Future<LoadSnapshotResult> loadSnapShot(String name) async {
     try {
       Map<dynamic, dynamic> map =
-          await _channel.invokeMethod('loadSnapShot', {"name": name});
+      await _channel.invokeMethod('loadSnapShot', {"name": name});
       return LoadSnapshotResult(map);
     } catch (e) {
-      return LoadSnapshotResult({"success": false, "exception": e});
+      return LoadSnapshotResult({"success": false, "exception": e.toString()});
     }
   }
 
@@ -58,43 +58,49 @@ class PlayGameService {
   /// @param name the snapshot's name
   /// @param data a byte array you want to save
   /// @param description the description of the snapshot, will add to it's metedata
-  static Future<PluginResult> saveSnapShot(
-      String name, Uint8List data, String description) async {
+  static Future<PluginResult> saveSnapShot(String name, Uint8List data,
+      String description) async {
     try {
       Map<dynamic, dynamic> result = await _channel.invokeMethod('saveSnapShot',
           {"name": name, "data": data, "description": description});
       return PluginResult(result);
     } catch (e) {
-      return PluginResult({"success": false, "exception": e});
+      return PluginResult({"success": false, "exception": e.toString()});
     }
   }
 
-  static Future<PluginResult> submitScore(
-      String leaderBoardId, int score) async {
+  static Future<PluginResult> submitScore(String leaderBoardId,
+      int score) async {
     try {
       Map<dynamic, dynamic> result = await _channel
           .invokeMethod('submitScore', {"id": leaderBoardId, "score": score});
       return PluginResult(result);
     } catch (e) {
-      return PluginResult({"success": false, "exception": e});
+      return PluginResult({"success": false, "exception": e.toString()});
     }
   }
 
   static Future<PluginResult> increment(String achivementId) async {
     try {
       Map<dynamic, dynamic> result =
-          await _channel.invokeMethod('increment', {"id": achivementId});
+      await _channel.invokeMethod('increment', {"id": achivementId});
       return PluginResult(result);
     } catch (e) {
-      return PluginResult({"success": false, "exception": e});
+      return PluginResult({"success": false, "exception": e.toString()});
     }
   }
 
   static void showLeaderboards() async {
-    _channel.invokeMethod('showLeaderboards');
+    try {
+      await _channel.invokeMethod('showLeaderboards');
+    } catch (e) {
+    }
   }
 
   static void showAchievements() async {
-    _channel.invokeMethod('showAchievements');
+    try {
+      await _channel.invokeMethod('showAchievements');
+    } catch (e) {
+    }
   }
 }

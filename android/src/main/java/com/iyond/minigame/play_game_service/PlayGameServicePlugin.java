@@ -1,5 +1,7 @@
 package com.iyond.minigame.play_game_service;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,8 +21,6 @@ import com.google.android.gms.games.snapshot.Snapshot;
 import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -119,12 +119,12 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                                         if (task1.isSuccessful()) {
                                             fr.success(new PluginResult().toMap());
                                         } else {
-                                            fr.success(new PluginResult(task.getException()).toMap());
+                                            fr.success(new PluginResult(task.getException().toString()).toMap());
                                         }
                                     }));
                         } else {
                             // 保存失败
-                            fr.success(new PluginResult(task.getException()).toMap());
+                            fr.success(new PluginResult(task.getException().toString()).toMap());
                         }
                     });
         } else if (call.method.equals("loadSnapShot")) {
@@ -136,11 +136,11 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                             try {
                                 fr.success(new PluginResult().setData(snapshot.getSnapshotContents().readFully()).toMap());
                             } catch (IOException e) {
-                                fr.success(new PluginResult(e).toMap());
+                                fr.success(new PluginResult(e.toString()).toMap());
                             }
                         } else {
                             // 保存失败
-                            fr.success(new PluginResult(task.getException()).toMap());
+                            fr.success(new PluginResult(task.getException().toString()).toMap());
                         }
                     });
         } else if (call.method.equals("increment")) {
@@ -149,26 +149,33 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                     .addOnSuccessListener((task) -> {
                         fr.success(new PluginResult().toMap());
                     }).addOnFailureListener((e) -> {
-                fr.success(new PluginResult(e).toMap());
+                fr.success(new PluginResult(e.toString()).toMap());
             });
             ;
         } else if (call.method.equals("submitScore")) {
+            int score = call.argument("score");
             Games.getLeaderboardsClient(context, GoogleSignIn.getLastSignedInAccount(context))
-                    .submitScoreImmediate(call.argument("id"), call.argument("score"))
+                    .submitScoreImmediate(call.argument("id"), score)
                     .addOnSuccessListener((task) -> {
                         fr.success(new PluginResult().toMap());
                     }).addOnFailureListener((e) -> {
-                fr.success(new PluginResult(e).toMap());
+                fr.success(new PluginResult(e.toString()).toMap());
             });
         } else if (call.method.equals("showAchievements")) {
             Games.getAchievementsClient(context, GoogleSignIn.getLastSignedInAccount(context))
                     .getAchievementsIntent().addOnSuccessListener((intent) -> {
                 activity.startActivityForResult(intent, 0);
+                fr.success(new PluginResult().toMap());
+            }).addOnFailureListener((e) -> {
+                fr.success(new PluginResult(e.toString()).toMap());
             });
         } else if (call.method.equals("showLeaderboards")) {
             Games.getLeaderboardsClient(context, GoogleSignIn.getLastSignedInAccount(context))
                     .getAllLeaderboardsIntent().addOnSuccessListener((intent) -> {
                 activity.startActivityForResult(intent, 0);
+                fr.success(new PluginResult().toMap());
+            }).addOnFailureListener((e) -> {
+                fr.success(new PluginResult(e.toString()).toMap());
             });
         } else {
             result.notImplemented();
@@ -208,20 +215,22 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if(lastResult != null){
-            if(requestCode == RC_SIGNIN) {
+        if (requestCode == RC_SIGNIN && lastResult != null) {
+            if(resultCode == RESULT_OK && intent != null){
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
                 if (result.isSuccess()) {
                     // The signed in account is stored in the result.
                     GoogleSignInAccount signedInAccount = result.getSignInAccount();
                     lastResult.success(new PluginResult().toMap());
                 } else {
-                    lastResult.success(new PluginResult(new Exception("Login failed")).toMap());
+                    lastResult.success(new PluginResult("Login failed").toMap());
                 }
-                return true;
+            } else {
+                lastResult.success(new PluginResult("User canceled").toMap());
             }
 
             lastResult = null;
+            return true;
         }
         return false;
     }

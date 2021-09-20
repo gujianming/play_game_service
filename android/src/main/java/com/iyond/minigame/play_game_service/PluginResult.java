@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class PluginResult {
     private boolean success;
-    private Exception exception;
+    private String exception;
     private Object data;
 
     public PluginResult setData(Object data){
@@ -24,7 +24,7 @@ public class PluginResult {
     public PluginResult(){
         this.success = true;
     }
-    public PluginResult(Exception exception){
+    public PluginResult(String exception){
         this.success = false;
         this.exception = exception;
     }
@@ -37,11 +37,11 @@ public class PluginResult {
         this.success = success;
     }
 
-    public Exception getException() {
+    public String getException() {
         return exception;
     }
 
-    public void setException(Exception exception) {
+    public void setException(String exception) {
         this.exception = exception;
     }
 
