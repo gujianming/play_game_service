@@ -75,7 +75,7 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         final Result fr = result;
         if (call.method.equals("signIn")) {
-            GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+            GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).requestEmail();
             if (parseBooleanValue(call.argument("scopeSnapShot"), false)) {
                 builder.requestScopes(Games.SCOPE_GAMES_SNAPSHOTS, Drive.SCOPE_APPFOLDER);
             }
@@ -94,7 +94,7 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                                 task -> {
                                     if (task.isSuccessful()) {
                                         // The signed in account is stored in the task's result.
-                                        fr.success(new PluginResult().toMap());
+                                        fr.success(new PluginResult().setData(task.getResult().getEmail()).toMap());
                                     } else {
                                         // silent sign-in failed, try to sign-in explicitly
                                         lastResult = fr;
@@ -221,7 +221,8 @@ public class PlayGameServicePlugin implements FlutterPlugin, MethodCallHandler, 
                 if (result.isSuccess()) {
                     // The signed in account is stored in the result.
                     GoogleSignInAccount signedInAccount = result.getSignInAccount();
-                    lastResult.success(new PluginResult().toMap());
+                    assert signedInAccount != null;
+                    lastResult.success(new PluginResult().setData(signedInAccount.getEmail()).toMap());
                 } else {
                     lastResult.success(new PluginResult("Login failed").toMap());
                 }

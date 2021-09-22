@@ -7,9 +7,18 @@ class PluginResult {
   bool success = false;
   String? message;
 
-  PluginResult(Map<dynamic, dynamic> map, {String? message}) {
+  PluginResult(Map<dynamic, dynamic> map) {
     this.success = map["success"];
     this.message = map["exception"];
+  }
+}
+class SignInResult extends PluginResult {
+  String? email;
+
+  SignInResult(Map<dynamic, dynamic> map) : super(map) {
+    if(this.success){
+      this.email = map["data"];
+    }
   }
 }
 
@@ -32,13 +41,13 @@ class PlayGameService {
 
   /// SignIn with google account, before you do anything, you must sign in
   /// @param scopeSnapShot set to ture if you want play with snapshots
-  static Future<PluginResult> signIn({bool scopeSnapShot = false}) async {
+  static Future<SignInResult> signIn({bool scopeSnapShot = false}) async {
     try {
       Map<dynamic, dynamic> result = await _channel
           .invokeMethod('signIn', {"scopeSnapShot": scopeSnapShot});
-      return PluginResult(result);
+      return SignInResult(result);
     } catch (e) {
-      return PluginResult({"success": false, "exception": e.toString()});
+      return SignInResult({"success": false, "exception": e.toString()});
     }
   }
 
